@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorayametro ❤️</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#FFE6F0;display:flex;justify-content:center;padding:18px}
+.app{width:390px;min-height:100vh;background:#FFF8FB;border-radius:30px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.25);position:relative}
+header{background:linear-gradient(135deg,#FF4F85,#FF8DB1);color:#fff;padding:18px;display:flex;align-items:center;gap:15px}
+header img{width:82px;height:82px;border-radius:50%;object-fit:cover;border:3px solid #fff}
+header h1{font-size:28px}
+.hero{text-align:center;padding:16px}
+.hero h2{color:#E52C6E}
+.hero p{color:#666}
+#pantalla{padding:0 15px 95px}
+.card{background:#fff;border-radius:18px;padding:15px;margin-bottom:14px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+.card h3{color:#D72663;margin-bottom:10px}
+.opciones{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.op{border:2px solid #FFD5E4;border-radius:12px;padding:10px;text-align:center;cursor:pointer}
+.op.activa{background:#FF4F85;color:#fff;border-color:#FF4F85}
+.boton{width:100%;padding:14px;border:none;border-radius:24px;background:#FF4F85;color:#fff;font-size:16px;margin-top:10px;cursor:pointer}
+.sec{background:#888}
+.termometro{height:220px;width:60px;margin:15px auto;background:#FFE3EC;border:4px solid #FF8DB1;border-radius:30px;position:relative;overflow:hidden}
+.nivel{position:absolute;bottom:0;width:100%;background:#FF296D;height:20%}
+.bola{position:absolute;width:80px;height:80px;border-radius:50%;background:#FF296D;left:50%;bottom:-15px;transform:translateX(-50%)}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dia{background:#FFF3F7;border-radius:10px;min-height:48px;text-align:center;padding-top:8px;cursor:pointer}
+.punto{width:7px;height:7px;background:#FF4F85;border-radius:50%;margin:4px auto}
+nav{position:absolute;bottom:0;width:100%;height:70px;background:#fff;border-top:1px solid #eee;display:flex}
+nav button{flex:1;border:none;background:none;font-size:11px;color:#555}
+nav span{display:block;font-size:22px}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+
+<img src="Sora.jpg" onerror="this.src='https://placehold.co/200x200?text=SORA'">
+
+<div>
+<h1>❤️ Sorayametro</h1>
+<p id="fecha"></p>
+</div>
+
+</header>
+
+<div class="hero">
+<h2>Termómetro del Amor</h2>
+<p>Las pequeñas cosas también cuentan ❤️</p>
+</div>
+
+<div id="pantalla"></div>
+
+<nav>
+<button onclick="inicio()"><span>❤️</span>Hoy</button>
+<button onclick="calendario()"><span>📅</span>Calendario</button>
+<button onclick="historico()"><span>📊</span>Histórico</button>
+<button onclick="nosotros()"><span>💕</span>Nosotros</button>
+</nav>
+
+</div>
+
+<script>
+
+const pantalla=document.getElementById("pantalla");
+
+let diario=JSON.parse(localStorage.getItem("sorayametro"))||[];
+
+const hoy=new Date();
+
+document.getElementById("fecha").innerText=
+hoy.toLocaleDateString("es-ES",{
+weekday:"long",
+day:"numeric",
+month:"long"
+});
+
+let respuestas={
+sentir:null,
+mejor:null,
+buenos:null,
+cambiar:null,
+planes:null
+};
+
+function seleccionar(grupo,valor,el){
+
+respuestas[grupo]=valor;
+
+document.querySelectorAll(`[data-grupo='${grupo}']`)
+.forEach(x=>x.classList.remove("activa"));
+
+el.classList.add("activa");
+
+}
+
+function crearFormulario(){
+
+pantalla.innerHTML=`
+
+<div class="card">
+<h3>😊 ¿Qué tal te sientes hoy Soraya?</h3>
+
+<div class="opciones">
+<div class="op" data-grupo="sentir" onclick="seleccionar('sentir',2,this)">😍 Genial</div>
+<div class="op" data-grupo="sentir" onclick="seleccionar('sentir',1,this)">🙂 Bien</div>
+<div class="op" data-grupo="sentir" onclick="seleccionar('sentir',0,this)">😐 Aceptable</div>
+<div class="op" data-grupo="sentir" onclick="seleccionar('sentir',-1,this)">😕 Regular</div>
+<div class="op" style="grid-column:1/3" data-grupo="sentir" onclick="seleccionar('sentir',-2,this)">😢 Mal</div>
+</div>
+
+</div>
+
+<div class="card">
+<h3>☀️ ¿Crees que hoy el día irá mejor que ayer?</h3>
+
+<div class="opciones">
+<div class="op" data-grupo="mejor" onclick="seleccionar('mejor',2,this)">Claro que sí</div>
+<div class="op" data-grupo="mejor" onclick="seleccionar('mejor',1,this)">Sí</div>
+<div class="op" data-grupo="mejor" onclick="seleccionar('mejor',0,this)">Quizás</div>
+<div class="op" data-grupo="mejor" onclick="seleccionar('mejor',-2,this)">NO</div>
+</div>
+
+</div>
+
+<div class="card">
+<h3>🌅 ¿Te has dado ya los buenos días con tu chico?</h3>
+
+<div class="opciones">
+<div class="op" data-grupo="buenos" onclick="seleccionar('buenos',2,this)">Sí</div>
+<div class="op" data-grupo="buenos" onclick="seleccionar('buenos',-1,this)">No</div>
+<div class="op" style="grid-column:1/3" data-grupo="buenos" onclick="seleccionar('buenos',-2,this)">No ni se espera</div>
+</div>
+
+</div>
+
+<div class="card">
+<h3>🌸 ¿Crees que puedes cambiar algo para que tu día sea mejor?</h3>
+
+<div class="opciones">
+<div class="op" data-grupo="cambiar" onclick="seleccionar('cambiar',2,this)">Claro que sí</div>
+<div class="op" data-grupo="cambiar" onclick="seleccionar('cambiar',1,this)">Sí</div>
+<div class="op" data-grupo="cambiar" onclick="seleccionar('cambiar',0,this)">Quizás</div>
+<div class="op" data-grupo="cambiar" onclick="seleccionar('cambiar',-2,this)">NO</div>
+</div>
+
+</div>
+
+<div class="card">
+<h3>💕 ¿Has hecho o vas a hacer planes para ver a tu chico hoy?</h3>
+
+<div class="opciones">
+<div class="op" data-grupo="planes" onclick="seleccionar('planes',2,this)">Sí</div>
+<div class="op" data-grupo="planes" onclick="seleccionar('planes',-1,this)">No</div>
+<div class="op" style="grid-column:1/3" data-grupo="planes" onclick="seleccionar('planes',-2,this)">No ni se espera</div>
+</div>
+
+</div>
+
+<button class="boton" onclick="guardarHoy()">
+❤️ Calcular Sorayametro
+</button>
+
+`;
+
+}
+
+function inicio(){
+
+const hoyISO=new Date().toISOString().split("T")[0];
+
+const existe=diario.find(x=>x.fecha===hoyISO);
+
+if(existe){
+mostrarResultado(existe);
+}else{
+crearFormulario();
+}
+
+}
+function reiniciarHoy(){
+
+const hoyISO=new Date().toISOString().split("T")[0];
+
+diario=diario.filter(x=>x.fecha!==hoyISO);
+
+localStorage.setItem("sorayametro",JSON.stringify(diario));
+
+respuestas={
+sentir:null,
+mejor:null,
+buenos:null,
+cambiar:null,
+planes:null
+};
+
+crearFormulario();
+
+}
+
+function guardarHoy(){
+
+if(
+respuestas.sentir===null ||
+respuestas.mejor===null ||
+respuestas.buenos===null ||
+respuestas.cambiar===null ||
+respuestas.planes===null
+){
+alert("Contesta las 5 preguntas ❤️");
+return;
+}
+
+const puntos=
+respuestas.sentir+
+respuestas.mejor+
+respuestas.buenos+
+respuestas.cambiar+
+respuestas.planes;
+
+const hoyISO=new Date().toISOString().split("T")[0];
+
+const registro={
+fecha:hoyISO,
+puntos:puntos,
+respuestas:{...respuestas}
+};
+
+diario=diario.filter(x=>x.fecha!==hoyISO);
+diario.push(registro);
+
+localStorage.setItem("sorayametro",JSON.stringify(diario));
+
+mostrarResultado(registro);
+
+}
+
+function nivel(p){
+
+if(p>=8)return["❤️ Estáis a tope",100,"😍"];
+if(p>=4)return["💖 Todo está bien",80,"😊"];
+if(p>=1)return["💛 Tranquila",60,"🙂"];
+if(p>=-4)return["🧡 Deberíais mejorar",35,"😕"];
+return["💔 Esto no hay por donde pillarlo",15,"😢"];
+
+}
+
+function mostrarResultado(d){
+
+const r=nivel(d.puntos);
+
+pantalla.innerHTML=`
+
+<div class="card" style="text-align:center">
+
+<h2>${r[0]}</h2>
+
+<div class="termometro">
+
+<div class="nivel" style="height:${r[1]}%"></div>
+
+<div class="bola"></div>
+
+</div>
+
+<div style="font-size:60px">${r[2]}</div>
+
+<h3>${d.puntos} puntos</h3>
+
+<p>Resultado del Sorayametro de hoy</p>
+
+<button class="boton" onclick="crearFormulario()">
+✏️ Editar respuestas
+</button>
+
+<button class="boton sec" onclick="reiniciarHoy()">
+🔄 Reiniciar hoy
+</button>
+
+</div>`;
+
+}
+
+function calendario(){
+
+const y=hoy.getFullYear();
+const m=hoy.getMonth();
+
+const primer=new Date(y,m,1);
+const offset=(primer.getDay()+6)%7;
+const dias=new Date(y,m+1,0).getDate();
+
+const meses=[
+"Enero","Febrero","Marzo","Abril","Mayo","Junio",
+"Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
+
+let html=`
+<div class="card">
+<h2>📅 ${meses[m]} ${y}</h2>
+<div class="grid">`;
+
+["L","M","M","J","V","S","D"].forEach(x=>{
+html+=`<div style="text-align:center;font-weight:bold">${x}</div>`;
+});
+
+for(let i=0;i<offset;i++)html+="<div></div>";
+
+for(let d=1;d<=dias;d++){
+
+const fecha=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+
+const existe=diario.find(x=>x.fecha===fecha);
+
+html+=`
+<div class="dia" onclick="verDia('${fecha}')">
+${d}
+${existe?'<div class="punto"></div>':""}
+</div>`;
+
+}
+
+html+=`</div><div id="detalle" style="margin-top:15px"></div></div>`;
+
+pantalla.innerHTML=html;
+
+}
+
+function verDia(f){
+
+const d=diario.find(x=>x.fecha===f);
+
+if(!d){
+
+detalle.innerHTML=`
+<div class="card">
+No hay registro ese día ❤️
+</div>`;
+
+return;
+
+}
+
+const r=nivel(d.puntos);
+
+detalle.innerHTML=`
+
+<div class="card">
+
+<h3>${f}</h3>
+
+<div style="font-size:48px;text-align:center">${r[2]}</div>
+
+<p><b>${r[0]}</b></p>
+
+<p>${d.puntos} puntos</p>
+
+</div>`;
+
+}
+
+function historico(){
+
+pantalla.innerHTML=`
+<div class="card">
+<h2>📊 Histórico</h2>
+<p>Días registrados: <b>${diario.length}</b></p>
+</div>`;
+
+const orden=[...diario].sort((a,b)=>b.fecha.localeCompare(a.fecha));
+
+orden.forEach(d=>{
+
+const r=nivel(d.puntos);
+
+pantalla.innerHTML+=`
+
+<div class="card">
+
+<div style="display:flex;justify-content:space-between">
+
+<b>${d.fecha}</b>
+
+<span style="font-size:28px">${r[2]}</span>
+
+</div>
+
+<p style="margin-top:8px">${r[0]}</p>
+
+<p>${d.puntos} puntos</p>
+
+</div>`;
+
+});
+
+if(orden.length===0){
+
+pantalla.innerHTML+=`
+<div class="card">
+Todavía no hay registros.
+</div>`;
+
+}
+
+}
+
+function nosotros(){
+
+pantalla.innerHTML=`
+
+<div class="card" style="text-align:center">
+
+<img src="Sora.jpg"
+style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid #FF8DB1;margin-bottom:12px;">
+
+<div style="font-size:60px">❤️</div>
+
+<h2>Sorayametro</h2>
+
+<p>Las pequeñas cosas también cuentan.</p>
+
+<p style="margin-top:15px;color:#E52C6E;font-weight:bold;">
+Cada día es una nueva oportunidad para querer mejor.
+</p>
+
+</div>`;
+
+}
+
+inicio();
+
+</script>
+
+</body>
+</html>
